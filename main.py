@@ -4,6 +4,7 @@ from typing import Optional
 import os
 from pypdf import PdfReader, PdfWriter
 from fpdf import FPDF
+from fpdf.enums import YPos
 
 # TODO: Turn this into a standalone importable package
 
@@ -73,8 +74,10 @@ class PdfLicenseWriter():
 
         pdf.cell(
             text="Este material foi licenciado para **{}** - CPF **{}**".format(self.client_name, self.client_cpf),
-            markdown=True
+            markdown=True, new_y=YPos.LAST, center=True
         )
+
+        # TODO: Add logo (optional) to license information
 
         pdf.output("temp.pdf")
 
