@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import Optional
 
+import os
 from pypdf import PdfReader, PdfWriter
+from fpdf import FPDF
 
 # TODO: Turn this into a standalone importable package
 
@@ -10,7 +12,6 @@ class PdfLicenseWriter():
                  client_cpf: Optional[str] = None, file_name: Optional[str] = None,
                  position: Optional[str] = None):
         # TODO: Add position default values (left/right/center etc)
-        # TODO: Add CPF formatting XXX.XXX.XXX-XX on visible text box (?)
 
         self.filepath = filepath
         self.client_name = client_name
@@ -56,27 +57,48 @@ class PdfLicenseWriter():
             }
         )
 
+    def generate_license_page(self, dimensions: tuple[float,float], position: Optional[str] = None) -> None:
+        pdf = FPDF()
+        pdf.set_font("Helvetica", size=9)
+        pdf.add_page(format=(dimensions[0],dimensions[1]))
+
+        pdf.cell(text="Este material foi licenciado para {} - CPF {}".format(self.client_name, self.client_cpf))
+        # TODO: Add expedition date (?)
+
+        pdf.output("temp.pdf")
+
     def write_annotations(self) -> None:
         # Get input file dimensions
         width = self.reader.get_page(0).mediabox.width
         height = self.reader.get_page(0).mediabox.height
         print("W: {} , H: {}".format(width, height))
 
-        # Generate new page with license information (per position) -> prob will have to use FPDF
-        license_writer = PdfWriter()
+        CORRECTION_FACTOR = 2.83464924069
 
-        license_writer.add_blank_page(width=width, height=height)
+        # Generate new page with license information (per position)
+        self.generate_license_page(dimensions = (width/CORRECTION_FACTOR, height/CORRECTION_FACTOR))
 
         # Overlay both documents (Stamp / Watermark)
+        license_stamp = PdfReader("temp.pdf").pages[0]
+
+        for page in self.writer.pages:
+            page.merge_page(license_stamp, over=True)
 
 
     def full_execution(self) -> None:
         self.instantiate_writer()
         self.write_metadata()
         self.write_annotations()
-
+        
+        # Export altered file
         with open("{}_{}.pdf".format(self.file_name, self.client_cpf), "wb") as f:
             self.writer.write(f)
+        
+        # Erase temp file
+        if os.path.exists("temp.pdf"):
+            os.remove("temp.pdf")
+
+        # TODO: Return the created file
 
 
 if __name__ == "__main__":
