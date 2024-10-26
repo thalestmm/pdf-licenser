@@ -28,10 +28,19 @@ class PdfLicenseWriter():
             raise Exception("File not found under \'{}\'".format(filepath))
 
     def read_metadata(self) -> None:
-        if self.reader.metadata is not None:
-            print(self.reader.metadata)
-        else:
-            print("No metadata found")
+        search_dict = {
+            "Name": "/LicensedToName",
+            "CPF": "/LicensedToCPF",
+            "Expedition Date": "/ExpeditionDate",
+        }
+
+        try:
+            for key, value in search_dict.items():
+                print("{} - {}".format(key, self.reader.metadata[value]))
+
+            # TODO: Return values as dict or json
+        except:
+            raise Exception("No license data found")
 
     def instantiate_writer(self) -> None:
         self.writer = PdfWriter()
@@ -59,11 +68,13 @@ class PdfLicenseWriter():
 
     def generate_license_page(self, dimensions: tuple[float,float], position: Optional[str] = None) -> None:
         pdf = FPDF()
-        pdf.set_font("Helvetica", size=9)
+        pdf.set_font("Helvetica", size=8)
         pdf.add_page(format=(dimensions[0],dimensions[1]))
 
-        pdf.cell(text="Este material foi licenciado para {} - CPF {}".format(self.client_name, self.client_cpf))
-        # TODO: Add expedition date (?)
+        pdf.cell(
+            text="Este material foi licenciado para **{}** - CPF **{}**".format(self.client_name, self.client_cpf),
+            markdown=True
+        )
 
         pdf.output("temp.pdf")
 
@@ -71,7 +82,6 @@ class PdfLicenseWriter():
         # Get input file dimensions
         width = self.reader.get_page(0).mediabox.width
         height = self.reader.get_page(0).mediabox.height
-        print("W: {} , H: {}".format(width, height))
 
         CORRECTION_FACTOR = 2.83464924069
 
@@ -104,3 +114,5 @@ class PdfLicenseWriter():
 if __name__ == "__main__":
     lw = PdfLicenseWriter(filepath = "./sample.pdf", client_name = "Thales", client_cpf = "123", file_name = "Livro")
     lw.full_execution()
+    rd = PdfLicenseWriter(filepath="./Livro_123.pdf")
+    rd.read_metadata()
