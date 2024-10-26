@@ -56,9 +56,24 @@ class PdfLicenseWriter():
             }
         )
 
+    def write_annotations(self) -> None:
+        # Get input file dimensions
+        width = self.reader.get_page(0).mediabox.width
+        height = self.reader.get_page(0).mediabox.height
+        print("W: {} , H: {}".format(width, height))
+
+        # Generate new page with license information (per position) -> prob will have to use FPDF
+        license_writer = PdfWriter()
+
+        license_writer.add_blank_page(width=width, height=height)
+
+        # Overlay both documents (Stamp / Watermark)
+
+
     def full_execution(self) -> None:
         self.instantiate_writer()
         self.write_metadata()
+        self.write_annotations()
 
         with open("{}_{}.pdf".format(self.file_name, self.client_cpf), "wb") as f:
             self.writer.write(f)
@@ -67,5 +82,3 @@ class PdfLicenseWriter():
 if __name__ == "__main__":
     lw = PdfLicenseWriter(filepath = "./sample.pdf", client_name = "Thales", client_cpf = "123", file_name = "Livro")
     lw.full_execution()
-    lw = PdfLicenseWriter(filepath = "./Livro_123.pdf")
-    lw.read_metadata()
