@@ -3,6 +3,7 @@ from typing import Optional
 
 from pypdf import PdfReader, PdfWriter
 
+# TODO: Turn this into a standalone importable package
 
 class PdfLicenseWriter():
     def __init__(self, filepath: Optional[str] = None, client_name: Optional[str] = None,
