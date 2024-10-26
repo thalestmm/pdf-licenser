@@ -10,7 +10,7 @@ from fpdf import FPDF
 class PdfLicenseWriter():
     def __init__(self, filepath: Optional[str] = None, client_name: Optional[str] = None,
                  client_cpf: Optional[str] = None, file_name: Optional[str] = None,
-                 position: Optional[str] = None):
+                 position: Optional[str] = None) -> None:
         # TODO: Add position default values (left/right/center etc)
 
         self.filepath = filepath
@@ -39,7 +39,7 @@ class PdfLicenseWriter():
         for page in self.reader.pages:
             self.writer.add_page(page)
 
-    def write_metadata(self, add_old_metadata: bool = True):
+    def write_metadata(self, add_old_metadata: bool = True) -> None:
         # Import existing metadata
         if self.reader.metadata is not None and add_old_metadata:
             self.writer.add_metadata(self.reader.metadata)
