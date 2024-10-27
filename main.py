@@ -77,8 +77,6 @@ class PdfLicenseWriter():
             markdown=True, new_y=YPos.LAST, center=True
         )
 
-        # TODO: Add logo (optional) to license information
-
         pdf.output("temp.pdf")
 
     def write_annotations(self) -> None:
