@@ -6,7 +6,11 @@ from pypdf import PdfReader, PdfWriter
 from fpdf import FPDF
 from fpdf.enums import YPos
 
+import logging
+logger = logging.getLogger(__name__)
+
 # TODO: Turn this into a standalone importable package
+# TODO: Add CLI tooling (receive params from cl) -> Maybe create another file?
 
 class PdfLicenseWriter():
     def __init__(self, filepath: Optional[str] = None, client_name: Optional[str] = None,
@@ -48,6 +52,18 @@ class PdfLicenseWriter():
 
         for page in self.reader.pages:
             self.writer.add_page(page)
+
+    def wipe_metadata(self) -> None:
+        if self.reader.metadata is not None:
+            logger.info("No metadata found on file")
+
+        self.writer.add_metadata({
+            "status": "wiped"
+        })
+
+        with open("{}_wiped".format(self.file_name), 'wb') as f:
+            self.writer.write(f)
+
 
     def write_metadata(self, add_old_metadata: bool = True) -> None:
         # Import existing metadata
